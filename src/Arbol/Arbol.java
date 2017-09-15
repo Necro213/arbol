@@ -11,42 +11,50 @@ package Arbol;
  */
 public class Arbol {
     private Nodo temp,raiz,t2;
-    public void crear(Object dato,String tipo,int prioridad){
+    public boolean crear(Object dato,String tipo,int prioridad){
         if(tipo.equals("parentesis_abrir") && raiz==null){
             raiz = new Nodo();
             raiz.hijo_izquierdo = new Nodo();
             t2 = raiz.hijo_izquierdo;
-            return;
+            return true;
         }
         if(raiz==null){
             temp = new Nodo(dato,tipo,prioridad,null,null);
             raiz = temp;
-            return;
+            return true;
         }
         temp = new Nodo(dato,tipo,prioridad,null,null);
-        acomodar(raiz);
+        return acomodar(raiz);
     }
     
-    public void acomodar(Nodo actual){
+    public boolean acomodar(Nodo actual){
         if(t2 != null){
             actual = t2;
         }
         if(temp.getTipo().equals("parentesis_cerrar")){
             t2 = null;
-            return;
+            return true;
         }
         if(actual.getDato() == null){
             actual.init(temp.getTipo(),temp.getPrioridad(),temp.getDato());
-            return;
+            return true;
         }
         if(actual.hijo_derecho != null && actual.hijo_derecho.getTipo().equals("operador")){
-            acomodar(actual.hijo_derecho);
+             if(actual.getPrioridad() > temp.getPrioridad() && temp.getTipo().equals("operador")){
+                temp.hijo_izquierdo = actual;
+                if(actual == raiz){
+                    raiz = temp;
+                }
+                return true;
+            }
+         return  acomodar(actual.hijo_derecho);
+         
         }
         
         if(temp.getTipo().equals("parentesis_abrir")){
             actual.hijo_derecho = new Nodo();
           t2 = actual.hijo_derecho;
-          return;
+          return true;
         }
         
         if(actual.getTipo().equals("operando") && temp.getTipo().equals("operador")){
@@ -54,25 +62,28 @@ public class Arbol {
             save.init(actual.getTipo(), actual.getPrioridad(), actual.getDato());
             actual.init(temp.getTipo(), temp.getPrioridad(), temp.getDato());
             actual.hijo_izquierdo = save;
-            return;
+            return true;
         }
         if(actual.getTipo().equals("operador") && temp.getTipo().equals("operando")){
             actual.hijo_derecho = temp;
-            return;
+            return true;
         }
         if(actual.getTipo().equals("operador") && temp.getTipo().equals("operador")){
             if(actual.getPrioridad() > temp.getPrioridad()){
                 temp.hijo_izquierdo = actual;
-                actual = temp.hijo_izquierdo;
-                return;
+                if(actual == raiz){
+                    raiz = temp;
+                }
+                return true;
             }
             if(actual.getPrioridad() < temp.getPrioridad()){
                 if(actual.hijo_derecho != null && actual.hijo_derecho.getTipo().equals("operando")){
                     temp.hijo_izquierdo = actual.hijo_derecho;
                     actual.hijo_derecho = temp;
-                    return;
+                    return true;
                 }
             }
         }
+        return false;
     }
 }
